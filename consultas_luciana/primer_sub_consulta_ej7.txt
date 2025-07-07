@@ -1,0 +1,100 @@
+#¿Dentro del partido de La Plata dónde puedo encontrar departamentos a estrenar? ¿Qué
+#diferencias de precio tienen en esos mismo lugares los departamentos a estrenar con los
+#departamentos usados?
+
+#prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+#prefix brick: <https://brickschema.org/schema/Brick#>
+#prefix dc: <http://purl.org/dc/elements/1.1/>
+#prefix dcterms: <http://purl.org/dc/terms/>
+#prefix foaf: <http://xmlns.com/foaf/0.1/>
+#prefix gr: <http://purl.org/goodrelations/v1#>
+#prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+#prefix owl: <http://www.w3.org/2002/07/owl#>
+#prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
+#prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+#prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+#prefix rec: <https://w3id.org/rec#>
+#prefix sioc: <http://rdfs.org/sioc/ns#>
+#prefix skos: <http://www.w3.org/2004/02/skos/core#>
+#prefix time: <http://www.w3.org/2006/time#>
+#prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+#
+#SELECT DISTINCT ?x
+#WHERE {
+#  ?a :city/rdfs:label ?x
+#  FILTER(CONTAINS(LCASE(STR(?x)), "plata")).
+#
+#}
+#
+## Esta query dio como resultado que no hay algo cuya ciudad sea La Plata, solo "Mar del Plata"
+#
+prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+prefix brick: <https://brickschema.org/schema/Brick#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix gr: <http://purl.org/goodrelations/v1#>
+prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rec: <https://w3id.org/rec#>
+prefix sioc: <http://rdfs.org/sioc/ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix time: <http://www.w3.org/2006/time#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+#
+#SELECT DISTINCT ?x
+#WHERE {
+#  ?a :neighborhood ?x
+#  
+#  FILTER(!(CONTAINS(STR(?x), "Mar_del_Plata")))
+#  FILTER(CONTAINS(LCASE(STR(?x)), "plata"))
+#}
+#
+## Esta nos dio que ni como barrio se encuentra La Plata
+
+
+# Vamos a usar la ciudad de Mar del Plata como fuente.
+# ¿Dentro de la ciudad de Mar del Plata dónde puedo encontrar departamentos a estrenar? ¿Qué
+# diferencias de precio tienen en esos mismo lugares los departamentos a estrenar con los
+# departamentos usados? 
+
+# Lo que quiero llegar a tener ==>
+# ?barrio | ?precioAEstrenarPromedio | ?precioUsadoPromedio
+# Centro  | 300,000                  | 250,000
+# None    | 0                        | 78,900
+
+
+SELECT ?departamentos (MAX(?fecha) AS ?fechaMasNueva) ?valorEnDolares
+WHERE{
+  ?departamentos a :Departamento .
+  ?departamentos ^sioc:about ?listings .
+  #?departamentos :hasFeature/:hasValue/:city/rdfs:label ?labelMDQ .
+  #FILTER(CONTAINS(LCASE(STR(?labelMDQ)), "mar del plata")) .
+  ?listings :hasFeature ?featBlankNodePrecio .
+  ?featBlankNodePrecio a :Precio .
+  ?featBlankNodePrecio time:hasTime/time:inXSDDateTimeStamp ?fecha .
+  
+  ?featBlankNodePrecio :hasValue ?blankNodePriceSpecification .
+  ?blankNodePriceSpecification a gr:UnitPriceSpecification .
+  ?blankNodePriceSpecification gr:priceType "BASE"^^xsd:string .
+  ?blankNodePriceSpecification gr:hasCurrency ?monedaSinEstandar .
+  ?blankNodePriceSpecification gr:hasCurrencyValue ?valorSinEstandar .
+
+  BIND(
+    IF(?monedaSinEstandar = "ARS", ?valorSinEstandar / 1260, ?valorSinEstandar)
+    AS ?valorEnDolares
+  )
+}
+GROUP BY ?departamentos ?valorEnDolares
+
+#Devuelve 242 resultados con las lineas 74 y 75 comentadas
+#Devuelve 222 resultados con las lineas 74 y 75 DEScomentadas
+
+# Primeras 3 lineas de los 222 resultados
+# departamentos                                                                                    | fechaMasNueva        | valorEnDolares
+# <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#real_estate_site2_A1145228233> | 2024-02-02T00:00:00Z | 53000
+# <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#real_estate_site2_A1145228279> |2024-02-02T00:00:00Z  | 26000
+# <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#real_estate_site2_A1145276947> |2024-02-02T00:00:00Z  | 29500
