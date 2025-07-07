@@ -1,80 +1,14 @@
-#¿Dentro del partido de La Plata dónde puedo encontrar departamentos a estrenar? ¿Qué
-#diferencias de precio tienen en esos mismo lugares los departamentos a estrenar con los
-#departamentos usados?
-
-#prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
-#prefix brick: <https://brickschema.org/schema/Brick#>
-#prefix dc: <http://purl.org/dc/elements/1.1/>
-#prefix dcterms: <http://purl.org/dc/terms/>
-#prefix foaf: <http://xmlns.com/foaf/0.1/>
-#prefix gr: <http://purl.org/goodrelations/v1#>
-#prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
-#prefix owl: <http://www.w3.org/2002/07/owl#>
-#prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
-#prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-#prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-#prefix rec: <https://w3id.org/rec#>
-#prefix sioc: <http://rdfs.org/sioc/ns#>
-#prefix skos: <http://www.w3.org/2004/02/skos/core#>
-#prefix time: <http://www.w3.org/2006/time#>
-#prefix xsd: <http://www.w3.org/2001/XMLSchema#>
-#
-#SELECT DISTINCT ?x
-#WHERE {
-#  ?a :city/rdfs:label ?x
-#  FILTER(CONTAINS(LCASE(STR(?x)), "plata")).
-#
-#}
-#
-## Esta query dio como resultado que no hay algo cuya ciudad sea La Plata, solo "Mar del Plata"
-#
-prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
-prefix brick: <https://brickschema.org/schema/Brick#>
-prefix dc: <http://purl.org/dc/elements/1.1/>
-prefix dcterms: <http://purl.org/dc/terms/>
-prefix foaf: <http://xmlns.com/foaf/0.1/>
-prefix gr: <http://purl.org/goodrelations/v1#>
-prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
-prefix owl: <http://www.w3.org/2002/07/owl#>
-prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
-prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-prefix rec: <https://w3id.org/rec#>
-prefix sioc: <http://rdfs.org/sioc/ns#>
-prefix skos: <http://www.w3.org/2004/02/skos/core#>
-prefix time: <http://www.w3.org/2006/time#>
-prefix xsd: <http://www.w3.org/2001/XMLSchema#>
-#
-#SELECT DISTINCT ?x
-#WHERE {
-#  ?a :neighborhood ?x
-#  
-#  FILTER(!(CONTAINS(STR(?x), "Mar_del_Plata")))
-#  FILTER(CONTAINS(LCASE(STR(?x)), "plata"))
-#}
-#
-## Esta nos dio que ni como barrio se encuentra La Plata
-
-
-# Vamos a usar la ciudad de Mar del Plata como fuente.
-# ¿Dentro de la ciudad de Mar del Plata dónde puedo encontrar departamentos a estrenar? ¿Qué
-# diferencias de precio tienen en esos mismo lugares los departamentos a estrenar con los
-# departamentos usados? 
-
-# Lo que quiero llegar a tener ==>
-# ?barrio | ?precioAEstrenarPromedio | ?precioUsadoPromedio
-# Centro  | 300,000                  | 250,000
-# None    | 0                        | 78,900
-
-
-SELECT *
+SELECT DISTINCT ?departamentos ?barrioMDQ
 WHERE {
-    ?departamentos a :Departamento .
-    ?departamentos :hasFeature/:hasValue/:city/rdfs:label ?labelMDQ
-    ?departamentos :hasFeature/:hasValue/:neighborhood ?barrioMDQ
-    FILTER(CONTAINS(LCASE(STR(?labelMDQ)), "plata")) .
-
-    BIND(
-        STR(?barrioMDQ)
-    )
+  ?departamentos a :Departamento .
+  ?departamentos :hasFeature/:hasValue/:city/rdfs:label ?labelMDQ .
+  ?departamentos :hasFeature/:hasValue/:neighborhood ?barrioFeoMDQ .
+  FILTER(CONTAINS(LCASE(STR(?labelMDQ)), "mar del plata")) .
+  # LIMPIO STRING DE BARRIO
+  BIND(
+    STRAFTER(
+      REPLACE(STR(?barrioFeoMDQ), "%20", " "),
+      "http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#neiborhood_province_Bs.As._Costa_Atl%25C3%25A1ntica_district_Mar_del_Plata_Bs.As._Costa_Atl%25C3%25A1ntica_")
+    AS ?barrioMDQ
+  )
 }
