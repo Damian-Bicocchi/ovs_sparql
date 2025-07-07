@@ -73,7 +73,9 @@ WHERE{
   ?departamentos ^sioc:about ?listings .
   #?departamentos :hasFeature/:hasValue/:city/rdfs:label ?labelMDQ .
   #FILTER(CONTAINS(LCASE(STR(?labelMDQ)), "mar del plata")) .
+  ?listings gr:hasBusinessFunction gr:Sell .
   ?listings :hasFeature ?featBlankNodePrecio .
+  
   ?featBlankNodePrecio a :Precio .
   ?featBlankNodePrecio time:hasTime/time:inXSDDateTimeStamp ?fecha .
   
