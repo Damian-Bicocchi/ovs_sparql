@@ -124,7 +124,7 @@ ORDER BY ?departamentos
 # departamentos                                                                                    | fechaMasNueva        | valorEnDolares | barrioMDQ
 # <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#real_estate_site2_A1145228233> | 2024-02-02T00:00:00Z | 53000          | Centro
 # <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#real_estate_site2_A1400680857> | 2024-02-02T00:00:00Z  | 52900         | Centro
-# <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#real_estate_site2_A1145276947> | 2024-02-02T00:00:00Z  | 52900         | Centro
+# <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#real_estate_site2_A1401119825> | 2024-02-02T00:00:00Z  | 52900         | Centro
 
 
 # En ambas subqueries aparece A1145228279, pero en el resultado final no
