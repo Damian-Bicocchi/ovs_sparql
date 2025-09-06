@@ -1,0 +1,53 @@
+prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+prefix brick: <https://brickschema.org/schema/Brick#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix gr: <http://purl.org/goodrelations/v1#>
+prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rec: <https://w3id.org/rec#>
+prefix sioc: <http://rdfs.org/sioc/ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix time: <http://www.w3.org/2006/time#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# 5 ¿Qué características tiene el mercado inmobiliario en Villa Argüello (Berisso)?
+# No existe el barrio Villa Argüello en esta BD
+
+# 5.2 ¿Qué características tiene el mercado inmobiliario en City Bell (La Plata)?
+## SUB-PREGUNTAS
+### A) ¿Qué cantidad de inmuebles se ofertan a la venta en este lugar? 54 de departamentos, 35 casas, 25 ph, 12 terrenos...
+### B) ¿Cuál sería el producto inmobiliario típico en este lugar?
+### C) ¿Cuál es la composición de los inmuebles en el flujo de oferta en este lugar?
+### D) ¿Cuál es la mediana del precio en USD/m2 de cada tipo de inmuebles? ==> La mediana no, la media es la unica que se puede calcular
+### E) ¿Cuál es la antigüedad promedio de los inmuebles construidos?
+
+
+### RESPONDEMOS LA A
+### A) ¿Qué cantidad de inmuebles se ofertan a la venta en este lugar? 54 de departamentos, 35 casas, 25 ph, 12 terrenos...
+SELECT ?label (COUNT(?tipo_inmueble) AS ?cantidad)
+WHERE {
+  ?listings a pronto:RealEstateListing .
+  ?listings sioc:about ?inmuebles .
+  ?listings gr:hasBusinessFunction gr:Sell .
+  ?inmuebles a ?tipo_inmueble .
+  ?tipo_inmueble a owl:Class .
+  ?tipo_inmueble rdfs:comment ?label .
+  ?inmuebles :hasFeature/:hasValue/:neighborhood  :neighborhood_City_Bell_province_Bs.As._G.B.A._Sur_district_Bs.As._G.B.A._Sur_La_Plata .
+   .
+  
+}
+GROUP BY ?label
+ORDER BY DESC(?cantidad)
+
+# Resultados
+#Casa 536
+#Departamento 73
+#Local comercial 31
+#Lote PH 17
+#Cochera 2
+#Galpón 2

@@ -1,0 +1,116 @@
+# ¿Qué diferencia de precio por m2 existe entre 
+# los terrenos de Villa Elvira (La Plata) y City Bell (La Plata)?
+
+prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+prefix brick: <https://brickschema.org/schema/Brick#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix gr: <http://purl.org/goodrelations/v1#>
+prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rec: <https://w3id.org/rec#>
+prefix sioc: <http://rdfs.org/sioc/ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix time: <http://www.w3.org/2006/time#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Primero debemos repensar la consigna, ya que no hay terrenos en villa elvira ni city bell
+# Obtenemos cuantos terrenos tiene cada ciudad
+# Mar del Plata ==> 349
+# Chapadmalal ==> 73
+# General Pueyrredon ==> 16
+# General Alvarado ==> 3
+# Mar chiquita ==> 1
+# Brandsen ==> 1
+#SELECT ?nombreCiudad (COUNT(*) AS ?cantidadTerrenos)
+#WHERE {
+#  ?terreno a :Terreno .
+#  ?terreno :hasFeature/:hasValue/:city/rdfs:label ?nombreCiudad .
+#}
+#GROUP BY ?nombreCiudad
+#ORDER BY DESC(?cantidadTerrenos)
+
+# ¿Qué diferencia de precio por m2 existe entre 
+# los terrenos de General Pueyrredon y General Alvarado?
+# 1 USD = 1221 ARS
+# 1 ha = 10,000 m2
+SELECT ?precioPromedioPueyrredon ?precioPromedioAlvarado ?diferencia
+WHERE {
+  {
+    # Si esta en pesos argentinos, debo convertirlo a USD (dividiendolo por 1221 según https://dolarhoy.com/ el 30/6/2025 a las 16.00 hs )
+    # Si esta en hectareas, debo multiplicarlo para expresarlo en m2
+    SELECT (
+      SUM(
+        IF(?currencyP = "ARS", ?valorDolaresP / 1221, ?valorDolaresP)
+      ) /
+      SUM(
+        IF(?unitOfMeasurementP = "ha", ?valorEnMetrosP * 10000, ?valorEnMetrosP)
+      )
+      AS ?precioPromedioPueyrredon
+    )
+    WHERE {
+      # Obtengo los terrenos de General Pueyrredon
+      ?terreno a :Terreno .
+      ?terreno :hasFeature/:hasValue/:city/rdfs:label ?nombreCiudadPueyrredon .
+      FILTER(CONTAINS(LCASE(?nombreCiudadPueyrredon), "pueyrredón")) .
+
+      # Accedo a los listings de estos terrenos
+      ?terreno ^sioc:about ?listing .
+
+      # Obtengo el blank node del precio
+      ?listing :hasFeature/:hasValue ?blankNodePrecio .
+      ?blankNodePrecio a gr:UnitPriceSpecification .
+      ?blankNodePrecio gr:hasCurrency ?currencyP .
+      ?blankNodePrecio gr:hasCurrencyValue ?valorDolaresP .
+      ?blankNodePrecio gr:priceType "BASE"^^xsd:string .
+
+      # Obtemgo el blank node de la superficie
+      ?terreno rec:includes/:hasFeature/:hasValue ?blankNodeSuperficie .
+      ?blankNodeSuperficie gr:hasUnitOfMeasurement ?unitOfMeasurementP .
+      ?blankNodeSuperficie gr:hasValue ?valorEnMetrosP .
+      FILTER(DATATYPE(?valorEnMetrosP) != xsd:string) .
+    }
+  }
+
+  {
+    # Si esta en pesos argentinos, debo convertirlo a USD (dividiendolo por 1221 según https://dolarhoy.com/ el 30/6/2025 a las 16.00 hs )
+    # Si esta en hectareas, debo multiplicarlo para expresarlo en m2
+    SELECT (
+      SUM(
+        IF(?currencyA = "ARS", ?valorDolaresA / 1221, ?valorDolaresA)
+      ) /
+      SUM(
+        IF(?unitOfMeasurementA = "ha", ?valorEnMetrosA * 10000, ?valorEnMetrosA)
+      )
+      AS ?precioPromedioAlvarado
+    )
+    WHERE {
+      # Obtengo los terrenos de General Pueyrredon
+      ?terreno a :Terreno .
+      ?terreno :hasFeature/:hasValue/:city/rdfs:label ?nombreCiudadAlvarado .
+      FILTER(CONTAINS(LCASE(?nombreCiudadAlvarado), "alvarado")) .
+
+      # Accedo a los listings de estos terrenos
+      ?terreno ^sioc:about ?listing .
+
+      # Obtengo el blank node del precio
+      ?listing :hasFeature/:hasValue ?blankNodePrecio .
+      ?blankNodePrecio a gr:UnitPriceSpecification .
+      ?blankNodePrecio gr:hasCurrency ?currencyA .
+      ?blankNodePrecio gr:hasCurrencyValue ?valorDolaresA .
+      ?blankNodePrecio gr:priceType "BASE"^^xsd:string .
+
+      # Obtemgo el blank node de la superficie
+      ?terreno rec:includes/:hasFeature/:hasValue ?blankNodeSuperficie .
+      ?blankNodeSuperficie gr:hasUnitOfMeasurement ?unitOfMeasurementA .
+      ?blankNodeSuperficie gr:hasValue ?valorEnMetrosA .
+      FILTER(DATATYPE(?valorEnMetrosA) != xsd:string) .
+    }
+  }
+  BIND(?precioPromedioPueyrredon - ?precioPromedioAlvarado AS ?diferencia)
+}
+

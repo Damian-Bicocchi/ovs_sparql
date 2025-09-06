@@ -1,0 +1,53 @@
+prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+prefix brick: <https://brickschema.org/schema/Brick#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix gr: <http://purl.org/goodrelations/v1#>
+prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rec: <https://w3id.org/rec#>
+prefix sioc: <http://rdfs.org/sioc/ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix time: <http://www.w3.org/2006/time#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?label ?numDormitorios ?numBaños (COUNT(*) AS ?cantidad)
+WHERE {
+  {
+    SELECT ?label ?inmuebles 
+           (COUNT(DISTINCT ?rooms) AS ?numDormitorios)
+           (COUNT(DISTINCT ?bathrooms) AS ?numBaños)
+    WHERE {
+      ?listings a pronto:RealEstateListing .
+      ?listings sioc:about ?inmuebles .
+      ?listings gr:hasBusinessFunction gr:Sell .
+      
+      ?inmuebles a ?tipo_inmueble .
+      ?tipo_inmueble a owl:Class .
+      ?tipo_inmueble rdfs:comment ?label .
+      
+      ?inmuebles :hasFeature/:hasValue/:neighborhood :neighborhood_City_Bell_province_Bs.As._G.B.A._Sur_district_Bs.As._G.B.A._Sur_La_Plata .
+      
+      ?inmuebles rec:includes ?building .
+      ?building a rec:Building .
+      
+      ?building brick:hasPart ?rooms .
+      ?rooms a rec:Bedroom . 
+      ?building brick:hasPart ?bathrooms .
+      ?bathrooms a rec:Bathroom . 
+      
+    }
+    # Lo debo agrupar por inmueble ( o sea, la casa en si. SI no, me suma TODOS los dormitorios de todas las casas en "CASA")
+    GROUP BY ?label ?inmuebles
+  }
+}
+GROUP BY ?label ?numDormitorios ?numBaños
+ORDER BY DESC(?cantidad)
+# Añado este LIMIT 1 para que me de rápido el máximo. Podría ser más perspicaz y usar un MAX
+# Pero te agradezco
+LIMIT 1
+

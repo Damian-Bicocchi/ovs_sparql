@@ -1,0 +1,63 @@
+prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+prefix brick: <https://brickschema.org/schema/Brick#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix gr: <http://purl.org/goodrelations/v1#>
+prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rec: <https://w3id.org/rec#>
+prefix sioc: <http://rdfs.org/sioc/ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix time: <http://www.w3.org/2006/time#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# 1.  ¿Cuánto vale una casa en Berisso?
+
+
+# Sigo sin poder usar un objeto especifico que
+# este marcado como Berisso.
+# (Esta el barrio Los Talas, pero por lo que
+# busque, o es un barrio privado, lo cual me lleva el promedio
+# demasiado alto, o es una localidad de 500 habitantes)
+
+# Resuelvo con el label hardcodeado y con el label
+# del listing.
+SELECT (AVG(?valueNormalized) AS ?averagePriceOfBerissoHouse)
+WHERE 
+{
+SELECT ?casa ?valueNormalized
+WHERE { 
+  ?casa a :House .
+  ?casa :hasFeature ?featureAddress .
+  ?featureAddress a :Address .
+  ?featureAddress :hasValue/:address ?labelAddress .
+  ?casa ^sioc:about ?listings .
+  # Aca una subconsulta para obtener los listings de hace máximo 3 meses podría ir bien
+  ?listings rdfs:label ?labelListing
+  FILTER(
+    CONTAINS(LCASE(STR(?labelAddress)), "berisso")
+    ||
+    CONTAINS(LCASE(STR(?labelListing)), "berisso")
+  ) .
+  ?listings gr:hasBusinessFunction gr:Sell .
+  ?listings :hasFeature ?featurePrice .
+  ?featurePrice a :Price .
+  ?featurePrice :hasValue/gr:priceType "BASE"^^xsd:string .
+  ?featurePrice :hasValue/gr:hasCurrency ?currencyNotNormalized .
+  ?featurePrice :hasValue/gr:hasCurrencyValue ?valueNotNormalized .
+  ?featurePrice time:hasTime/time:inXSDDateTimeStamp ?listingsDate
+  BIND(
+      IF(?currencyNotNormalized != "USD", ?valueNotNormalized / 1375, ?valueNotNormalized)
+      AS ?valueNormalized
+  )
+  
+
+}
+GROUP BY ?casa ?valueNormalized
+}
+
+# Resultado sin la subconsulta de fechas => 68037.0390625

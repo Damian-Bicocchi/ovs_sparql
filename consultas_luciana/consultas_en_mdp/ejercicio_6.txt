@@ -1,0 +1,146 @@
+#¿Qué precio por metro cuadrado tienen los departamentos en Vicente López? ¿Son más baratos
+#que en Quilmes?
+
+prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+prefix brick: <https://brickschema.org/schema/Brick#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix gr: <http://purl.org/goodrelations/v1#>
+prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rec: <https://w3id.org/rec#>
+prefix sioc: <http://rdfs.org/sioc/ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix time: <http://www.w3.org/2006/time#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+#SELECT ?barrio (COUNT(*) as ?cant)
+#WHERE{
+#    ?real_estate_instance a :Departamento .
+#    ?real_estate_instance :hasFeature/:hasValue/:neighborhood ?barrio .
+#}
+#GROUP BY (?barrio)
+#ORDER BY DESC(?cant)
+# Esto dio como resultado 276 departamentos con barrio
+# MDQ None = 118
+# MDQ Centro = 68 
+# MDQ Otros Barrios = 19
+# MDQ Plaza Colon = 18
+# MDQ La Perla = 11
+# MDQ Macrocentro = 7
+# MDQ Chauvin = 5
+# MDQ Terminal vieja = 3
+# MDQ Güemes = 3
+# MDQ Terminal nueva = 2
+# MDQ Belisario Roldan = 2
+# MDQ Plaza Mitre = 2
+# MDQ Etchepare = 2
+# MDQ Peralta Ramos = 2
+# Y luego demás barrios que solo tienen 1.
+# Vamos a comparar el precio promedio de USD/m2 de Plaza Colon, y compararlo con el de MDQ la perla
+
+#              Colon    / Perla
+# Resultados = 1710.273 / 1670.5625
+# Tiempo = 19 ms
+SELECT *
+WHERE{
+    {
+        # Plaza Colon
+        SELECT (AVG(?promIndividual) AS ?promUSDm2Colon)
+        WHERE {
+            ?real_estate_instance a :Departamento .
+            ?real_estate_instance :hasFeature/:hasValue/:neighborhood ?barrio .
+            FILTER(CONTAINS(STR(?barrio), "20Col%C3%B3n"))
+
+            ?real_estate_instance ^sioc:about ?listing .
+
+            # Sacamos el precio
+            ?listing :hasFeature/:hasValue ?blankNodePrecio .
+            ?blankNodePrecio a gr:UnitPriceSpecification .
+
+            ?blankNodePrecio gr:hasCurrency ?monedaSinEstandar .
+            ?blankNodePrecio gr:hasCurrencyValue ?valorSinEstandar .
+            ?blankNodePrecio gr:priceType "BASE"^^xsd:string .
+
+            # Estandarizamos a dolares
+            BIND(
+                IF(?monedaSinEstandar = "ARS", ?valorSinEstandar / 1260, ?valorSinEstandar)
+                AS ?valorEnDolares
+            )
+
+            # Buscamos el tamaño
+            ?real_estate_instance rec:includes ?blankNodeSuperficie .
+            # Nos quedamos unicamente con los rec:Site
+            ?blankNodeSuperficie a rec:Site.
+            # Un departamento tiene dos superficies. Una total, y un subconjunto de la total que es la cubierta
+            # Los departamentos de este barrio que estan en hectareas en la superficie total, no tienen valor
+            # Debe de ser un error?
+            # La cubierta
+            ?blankNodeSuperficie :hasFeature/:hasValue ?blankNodeSuperficieCubierta .
+            ?blankNodeSuperficieCubierta pronto:size_type "covered"^^xsd:string .
+            ?blankNodeSuperficieCubierta gr:hasUnitOfMeasurement ?medidaCubiertaSinEstandar .
+            ?blankNodeSuperficieCubierta gr:hasValue ?valorCubiertaSinEstandar .
+
+            BIND(
+                IF(?medidaCubiertaSinEstandar = "ha", ?valorCubiertaSinEstandar * 10000, ?valorCubiertaSinEstandar)
+                AS ?valorEnMetros
+            )
+            
+            BIND(
+                (xsd:float(?valorEnDolares) / xsd:float(?valorEnMetros)) AS ?promIndividual
+            )
+        }
+    }
+    {
+        # La Perla
+        SELECT (AVG(?promIndividual) AS ?promUSDm2Perla)
+        WHERE {
+            ?real_estate_instance a :Departamento .
+            ?real_estate_instance :hasFeature/:hasValue/:neighborhood ?barrio .
+            FILTER(CONTAINS(STR(?barrio), "Perla"))
+
+            ?real_estate_instance ^sioc:about ?listing .
+
+            # Sacamos el precio
+            ?listing :hasFeature/:hasValue ?blankNodePrecio .
+            ?blankNodePrecio a gr:UnitPriceSpecification .
+
+            ?blankNodePrecio gr:hasCurrency ?monedaSinEstandar .
+            ?blankNodePrecio gr:hasCurrencyValue ?valorSinEstandar .
+            ?blankNodePrecio gr:priceType "BASE"^^xsd:string .
+
+            # Estandarizamos a dolares
+            BIND(
+                IF(?monedaSinEstandar = "ARS", ?valorSinEstandar / 1260, ?valorSinEstandar)
+                AS ?valorEnDolares
+            )
+
+            # Buscamos el tamaño
+            ?real_estate_instance rec:includes ?blankNodeSuperficie .
+            # Nos quedamos unicamente con los rec:Site
+            ?blankNodeSuperficie a rec:Site.
+            # Un departamento tiene dos superficies. Una total, y un subconjunto de la total que es la cubierta
+            # Los departamentos de este barrio que estan en hectareas en la superficie total, no tienen valor
+            # Debe de ser un error?
+            # La cubierta
+            ?blankNodeSuperficie :hasFeature/:hasValue ?blankNodeSuperficieCubierta .
+            ?blankNodeSuperficieCubierta pronto:size_type "covered"^^xsd:string .
+            ?blankNodeSuperficieCubierta gr:hasUnitOfMeasurement ?medidaCubiertaSinEstandar .
+            ?blankNodeSuperficieCubierta gr:hasValue ?valorCubiertaSinEstandar .
+
+            BIND(
+                IF(?medidaCubiertaSinEstandar = "ha", ?valorCubiertaSinEstandar * 10000, ?valorCubiertaSinEstandar)
+                AS ?valorEnMetros
+            )
+            
+            BIND(
+                (xsd:float(?valorEnDolares) / xsd:float(?valorEnMetros)) AS ?promIndividual
+            )
+        }
+    }
+}
+

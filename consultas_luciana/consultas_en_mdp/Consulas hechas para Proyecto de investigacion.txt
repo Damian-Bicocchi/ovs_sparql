@@ -1,0 +1,383 @@
+Me ayudo gepeto. Me da todos los tipos de inmuebles, nos aseguramos de que sean realstate. 
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX inmo: <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+
+SELECT DISTINCT ?tipo
+WHERE {
+  ?inmueble rdf:type ?tipo .
+  FILTER(CONTAINS(STR(?inmueble), "real_estate"))
+}
+
+------------------------------------------------
+¿Cuáles son los avisos que publican inmuebles en "febrero de 2024"?
+
+Asi me la tiro chat:
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX inmo: <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+PREFIX avis: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#> 
+PREFIX io: <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#> 
+PREFIX time: <http://www.w3.org/2006/time#> 
+PREFIX sioc: <http://rdfs.org/sioc/ns#>
+
+
+SELECT DISTINCT ?aviso ?fecha
+WHERE {
+  ?aviso sioc:read_at ?fecha .
+  FILTER(STRSTARTS(STR(?fecha), "2024-02"))
+}
+
+---------------------------------------------------------------------------------
+Todas las ciudades del grafo
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX inmo: <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+PREFIX avis: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#> 
+PREFIX io: <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#> 
+PREFIX time: <http://www.w3.org/2006/time#> 
+PREFIX sioc: <http://rdfs.org/sioc/ns#>
+
+
+SELECT DISTINCT ?ciudad
+WHERE {
+  ?direccion rdf:type io:PostalAddress .
+  ?direccion io:city ?ciudad .
+}
+
+O:
+
+SELECT *
+WHERE {
+  ?ciudad rdf:type io:City .
+}
+LIMIT 50
+
+------------------------- Tipos de inmuebles ----------------------------------------
+SELECT *
+WHERE { 
+  ?TipoInmueble rdfs:subClassOf rec:RealEstate.
+
+}
+LIMIT 100
+
+------------------------ Listing casas y sus casas   ---------------------------------
+SELECT ?listingCasas ?casas
+WHERE { 
+   ?casas rdf:type io:Casa.
+   ?listingCasas sioc:about ?casas.
+}
+LIMIT 100
+
+
+-------------------------------------------------------------------------------
+Todas las provincias 
+
+SELECT *
+WHERE {
+  ?localidades rdf:type io:Province .
+}
+LIMIT 50
+
+
+-----------------------------------
+Todos los anuncios sobre inmuebles:
+SELECT *
+WHERE {
+  ?inmueble sioc:about ?listing.
+ 
+}
+
+
+------------ Todas las ciudades de las casas ---------------
+Me quede hasta aca y no pude mas
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX inmo: <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+PREFIX avis: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#> 
+PREFIX io: <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#> 
+PREFIX time: <http://www.w3.org/2006/time#> 
+PREFIX sioc: <http://rdfs.org/sioc/ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rec: <https://w3id.org/rec#> 
+PREFIX gr: <http://purl.org/goodrelations/v1#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+SELECT ?ciudad
+WHERE { 
+   ?casas rdf:type io:Casa.
+   ?feature 
+   io:Precio rdfs:subClassOf ?subclasesFeature.
+   ?subClasesFeature io:hasDetail ?bndetalle.
+   ?bndetalle io:hasScraperValue ?scrapper.
+   ?scrapper io:city ?ciudad.
+}
+LIMIT 100
+
+
+-----------------------------------
+Precio todos los listings
+SELECT ?listings ?valor
+WHERE {
+  ?listings rdf:type io:Precio.
+  
+  ?listings io:hasDetail ?precio.
+  ?precio io:hasScraperValue ?bnvalor.
+  ?bnvalor gr:hasCurrencyValue ?valor
+}
+LIMIT 50
+
+------- Casas con valor, moneda, y tipo de precio --------
+SELECT ?propiedad ?tipo ?valor ?tipoPrecio
+WHERE { 
+  ?propiedad rdf:type io:Casa.
+  ?listing sioc:about ?propiedad.
+  ?listing io:hasFeature ?feature .
+  ?feature rdf:type io:Precio.
+  ?feature io:hasDetail ?bnDetalle.
+  ?bnDetalle io:hasScraperValue ?bnValor.
+  ?bnValor gr:hasCurrency ?tipo.
+  ?bnValor gr:hasCurrencyValue ?valor.
+  ?bnValor gr:priceType ?tipoPrecio.
+  }
+LIMIT 100
+------------------ direcciones casas ------------
+SELECT ?propiedad ?direccion
+WHERE { 
+  ?propiedad rdf:type io:Casa.
+  ?propiedad io:hasFeature ?feature.
+  ?feature io:hasDetail ?bnfeature .
+  ?bnfeature io:hasScraperValue ?bnDetalle.
+  ?bnSc io:address ?direccion
+  }
+LIMIT 100
+
+------------------ direcciones casas no están en mardel --------------
+SELECT ?propiedad ?direccion  ?label
+WHERE { 
+  ?propiedad rdf:type io:Casa.
+  ?propiedad io:hasFeature ?feature.
+  ?feature io:hasDetail ?bnfeature .
+  ?bnfeature io:hasScraperValue ?bnDetalle.
+  ?bnSc io:address ?direccion .
+  ?bnSc io:city ?city. 
+  ?city rdfs:label ?label
+  FILTER (STR(?label) != "Mar del Plata")
+  }
+LIMIT 200
+
+
+---------------------------- 1. ¿Cuánto vale una casa en Berisso? (Brandsen porque en Berisso no hay -----------------
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX inmo: <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+PREFIX avis: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#> 
+PREFIX io: <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#> 
+PREFIX time: <http://www.w3.org/2006/time#> 
+PREFIX sioc: <http://rdfs.org/sioc/ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rec: <https://w3id.org/rec#> 
+PREFIX gr: <http://purl.org/goodrelations/v1#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+SELECT ?propiedad ?direccion  ?label ?tipo ?valor ?tipoPrecio
+WHERE { 
+  ?propiedad rdf:type io:Casa.
+  ?propiedad io:hasFeature ?feature.
+  ?feature io:hasDetail ?bnfeature .
+  ?bnfeature io:hasScraperValue ?bnDetalle.
+  ?bnDetalle  io:address ?direccion.
+  ?bnDetalle io:city ?city. 
+  ?city rdfs:label ?label.
+  ?listing sioc:about ?propiedad.
+  ?listing io:hasFeature ?featureL.
+  ?featureL rdf:type io:Precio.
+  ?featureL io:hasDetail ?bnDetalleL.
+  ?bnDetalleL io:hasScraperValue ?blSL.
+  ?blSL gr:hasCurrency ?tipo.
+  ?blSL gr:hasCurrencyValue ?valor.
+  ?blSL gr:priceType ?tipoPrecio.
+
+
+  FILTER (STRSTARTS(STR(?label),"Brandsen"))
+  }
+LIMIT 200
+
+
+----------------------------------------------------------------------------------------------------------------
+
+SELECT ?address ?cityLabel ?value ?currency ?priceType
+WHERE { 
+  # Obtengo las propiedades que son Casa y guardo las features en ?feature
+  ?realEstateSite rdf:type io:Casa;
+    io:hasFeature ?featureAddress.
+
+  # Obtengo los detalles de las features (son blank nodes)
+  ?featureAddress io:hasDetail ?bnFeatureAddressDetail.
+
+  # Obtengo los ScraperValue de los detalles (son blank nodes)
+  ?bnFeatureAddressDetail io:hasScraperValue ?bnAddressScraperValue.
+
+  # Obtengo los datos de dirección y ciudad del ScraperValue
+  # La dirección es un literal, la ciudad es otro nodo
+  ?bnAddressScraperValue  io:address ?address;
+    io:city ?city. 
+
+  # Para hacer legible la información de la ciudad, busco el label
+  # Primero filtro por Brandsen y después me guardo los labels en una variable para el select.
+  ?city rdfs:label "Brandsen"^^xsd:string;
+    rdfs:label ?cityLabel.
+
+  # Para buscar el precio, asocio las casas con sus listings que se guardan en ?listing.
+  # Además, obtengo los features asociados (precio generalmente)
+  ?listing sioc:about ?realEstateSite;
+    io:hasFeature ?featurePriceListing.
+
+  # Filtro los features solo de precio (suelen ser todos de precio, pero igual)
+  # Obtengo el detalle del feature (es un blank node)
+  ?featurePriceListing rdf:type io:Precio;
+     io:hasDetail ?bnFeaturePriceListingDetail.
+
+  # Obtengo los ScraperValue de los detalles (son blank nodes)
+  ?bnFeaturePriceListingDetail io:hasScraperValue ?bnPriceScraperValue.
+
+  # Obtengo los datos de moneda, valor y tipo de valor del ScraperValue
+  # Todos son literales
+  ?bnPriceScraperValue gr:hasCurrency ?currency;
+    gr:hasCurrencyValue ?value;
+    gr:priceType ?priceType.
+
+}
+LIMIT 200
+
+# ! En el grafo viejo hay 2 listings correspondientes a propiedades en Brandsen, pero solo una es io:Casa
+
+----------------------------  ¿Cuál es el precio en dólares por metro cuadrado de los terrenos en La Plata? --------------------------
+prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+prefix brick: <https://brickschema.org/schema/Brick#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix gr: <http://purl.org/goodrelations/v1#>
+prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rec: <https://w3id.org/rec#>
+prefix sioc: <http://rdfs.org/sioc/ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix time: <http://www.w3.org/2006/time#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?unidadDeMedida ?precioPorMetroUSD ?precio ?moneda
+WHERE { 
+  ?listing sioc:about ?RealEs.
+  ?listing :hasFeature ?feature.
+  ?feature a :Precio.
+  ?feature :hasDetail ?bnPrecio.
+  ?bnPrecio :hasScraperValue ?bnS.
+  ?bnS gr:hasCurrency ?moneda.
+  ?bnS gr:hasCurrencyValue ?precio.
+
+  ?RealEs a :Terreno.
+  ?RealEs rec:includes ?siteReal.
+  ?siteReal :hasFeature ?bnDim.
+  ?bnDim :hasDetail ?detailDim.
+  ?detailDim :hasScraperValue ?scraperValueDimension.
+  ?scraperValueDimension gr:hasUnitOfMeasurement ?unidadDeMedida.
+  ?scraperValueDimension gr:hasValue ?dimension.
+
+  ?RealEs :hasFeature ?featureReal.
+  ?featureReal :hasDetail ?detailFeature.
+  
+  ?detailFeature :hasScraperValue ?detailFeaturebn.
+  ?detailFeaturebn :city ?ciudad.
+  ?ciudad rdfs:label ?ciudadS.
+  
+  FILTER ( ?ciudadS = "Mar del Plata")
+
+  BIND(
+    if(?unidadDeMedida = "ha",
+      ?precio/ (?dimension *1000),
+      ?precio / ?dimension
+    )AS ?precioPorMetro
+  )
+  
+  BIND(
+    IF(?moneda = "ARS",
+      ?precioPorMetro / 1200,
+      ?precioPorMetro
+    ) AS ?precioPorMetroUSD
+  )
+ 
+  
+} LIMIT 100
+
+Mar del Plata porque no hay nada en La plata
+
+
+------------------------ 4. ¿Qué diferencia de precio por m2 existe entre los terrenos de Villa Elvira (La Plata) y City Bell (La Plata)? ---------------------
+ 
+Use chapadmadal y mar del plata
+prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+prefix brick: <https://brickschema.org/schema/Brick#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix gr: <http://purl.org/goodrelations/v1#>
+prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rec: <https://w3id.org/rec#>
+prefix sioc: <http://rdfs.org/sioc/ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix time: <http://www.w3.org/2006/time#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?ciudadS  (AVG (?precioPorMetroUSD) AS ?precioPromedioUSD)
+WHERE { 
+  ?listing sioc:about ?RealEs.
+  ?listing :hasFeature ?feature.
+  ?feature a :Precio.
+  ?feature :hasDetail ?bnPrecio.
+  ?bnPrecio :hasScraperValue ?bnS.
+  ?bnS gr:hasCurrency ?moneda.
+  ?bnS gr:hasCurrencyValue ?precio.
+ 
+ # Consigo todos los terrenos, los valores 
+  ?RealEs a :Terreno.
+  ?RealEs rec:includes ?siteReal.
+  ?siteReal :hasFeature ?bnDim.
+  ?bnDim :hasDetail ?detailDim.
+  ?detailDim :hasScraperValue ?scraperValueDimension.
+  ?scraperValueDimension gr:hasUnitOfMeasurement ?unidadDeMedida.
+  ?scraperValueDimension gr:hasValue ?dimension.
+
+  ?RealEs :hasFeature ?featureReal.
+  ?featureReal :hasDetail ?detailFeature.
+  
+  ?detailFeature :hasScraperValue ?detailFeaturebn.
+  ?detailFeaturebn :city ?ciudad.
+  ?ciudad rdfs:label ?ciudadS.
+  FILTER ( ?ciudadS = "Mar del Plata" || ?ciudadS = "Chapadmalal")
+ 
+  BIND(
+    if(?unidadDeMedida = "ha",
+      ?precio/ (?dimension *1000),
+      ?precio / ?dimension
+    )AS ?precioPorMetro
+  )
+  
+  BIND(
+    IF(?moneda = "ARS",
+      ?precioPorMetro / 1200,
+      ?precioPorMetro
+    ) AS ?precioPorMetroUSD
+  )
+ 
+ 
+} GROUP BY ?ciudadS
+
+

@@ -1,0 +1,419 @@
+# ¿Qué características tiene el mercado inmobiliario en Villa Argüello (Berisso)?
+
+#prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+#prefix brick: <https://brickschema.org/schema/Brick#>
+#prefix dc: <http://purl.org/dc/elements/1.1/>
+#prefix dcterms: <http://purl.org/dc/terms/>
+#prefix foaf: <http://xmlns.com/foaf/0.1/>
+#prefix gr: <http://purl.org/goodrelations/v1#>
+#prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+#prefix owl: <http://www.w3.org/2002/07/owl#>
+#prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
+#prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+#prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+#prefix rec: <https://w3id.org/rec#>
+#prefix sioc: <http://rdfs.org/sioc/ns#>
+#prefix skos: <http://www.w3.org/2004/02/skos/core#>
+#prefix time: <http://www.w3.org/2006/time#>
+#prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Tenemos que cambiar un poco la consigna ya que no hay nada en Berisso
+
+#SELECT ?nombreCiudad (COUNT(*) AS ?cantidadInmuebles)
+#WHERE {
+#  ?listing a pronto:RealEstateListing .
+#  ?listing sioc:about ?inmueble .
+#  ?inmueble :hasFeature/:hasValue/:city/rdfs:label ?nombreCiudad .
+#}
+#GROUP BY ?nombreCiudad
+#ORDER BY DESC(?cantidadInmuebles)
+
+# MDQ = 990
+# Chapadmalal = 138
+# General Pueyrredon = 17
+# General Alvarado = 10
+# Balcarce = 5
+# Miramar = 3
+# Brandsen = 2
+# Bolivar = 1
+# Castelli = 1
+# Florencio Varela = 1
+# Mar chiquita = 1
+# Mar del Sur = 1
+
+# ¿Qué características tiene el mercado inmobiliario en Chapadmalal?
+
+# # Que debemos hacer
+
+# # # Cantidad de inmuebles que se ofertan a la venta en este lugar
+# # # Producto inmobiliario tipico ==> ?????
+# # # Composición de los inmuebles ==> El 45% de los inmuebles son casas, el 30% son terrenos...
+# # # Mediana del precio en USD / M2 de cad tipo de inmuebles
+# # # Antiguedad promedio de los inmuebles construidos => TERRENO NO (supongo)
+
+# Primera consulta, contar los que tiene chapadmalal
+#SELECT ?label (count(?tipo_inmueble) AS ?cantidad)
+#WHERE 
+#  {
+#    # Cantidad de inmuebles que se ofertan a la venta. 15 departamentos, 20 casas, etc.
+#    ?listings a pronto:RealEstateListing .
+#    ?listings sioc:about ?inmuebles .
+#    ?listings gr:hasBusinessFunction gr:Sell .
+#    ?inmuebles a ?tipo_inmueble .
+#    ?inmuebles :hasFeature/:hasValue/:city/rdfs:label ?nombreCiudad .
+#
+#    FILTER(CONTAINS(LCASE(?nombreCiudad), "chapadmalal")) .
+#    
+#    BIND(REPLACE(STRAFTER(STR(?tipo_inmueble), "#"), "%20", " ") AS ?label)
+#}
+#GROUP BY ?label
+#ORDER BY DESC(?cantidad)
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+
+# ¿Qué características tiene el mercado inmobiliario en Villa Argüello (Berisso)?
+
+#prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+#prefix brick: <https://brickschema.org/schema/Brick#>
+#prefix dc: <http://purl.org/dc/elements/1.1/>
+#prefix dcterms: <http://purl.org/dc/terms/>
+#prefix foaf: <http://xmlns.com/foaf/0.1/>
+#prefix gr: <http://purl.org/goodrelations/v1#>
+#prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+#prefix owl: <http://www.w3.org/2002/07/owl#>
+#prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
+#prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+#prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+#prefix rec: <https://w3id.org/rec#>
+#prefix sioc: <http://rdfs.org/sioc/ns#>
+#prefix skos: <http://www.w3.org/2004/02/skos/core#>
+#prefix time: <http://www.w3.org/2006/time#>
+#prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Tenemos que cambiar un poco la consigna ya que no hay nada en Berisso
+
+#SELECT ?nombreCiudad (COUNT(*) AS ?cantidadInmuebles)
+#WHERE {
+#  ?listing a pronto:RealEstateListing .
+#  ?listing sioc:about ?inmueble .
+#  ?inmueble :hasFeature/:hasValue/:city/rdfs:label ?nombreCiudad .
+#}
+#GROUP BY ?nombreCiudad
+#ORDER BY DESC(?cantidadInmuebles)
+
+# MDQ = 990
+# Chapadmalal = 138
+# General Pueyrredon = 17
+# General Alvarado = 10
+# Balcarce = 5
+# Miramar = 3
+# Brandsen = 2
+# Bolivar = 1
+# Castelli = 1
+# Florencio Varela = 1
+# Mar chiquita = 1
+# Mar del Sur = 1
+
+# ¿Qué características tiene el mercado inmobiliario en Chapadmalal?
+
+# # Que debemos hacer
+
+# # # Cantidad de inmuebles que se ofertan a la venta en este lugar
+# # # Producto inmobiliario tipico ==> ?????
+# # # Composición de los inmuebles ==> El 45% de los inmuebles son casas, el 30% son terrenos...
+# # # Mediana del precio en USD / M2 de cada tipo de inmuebles
+# # # Antiguedad promedio de los inmuebles construidos => TERRENO NO (supongo)
+
+# 1) Label y cantidad
+# 2) ???
+# 3) Composición de los inmuebles
+#SELECT ?label ?cantidad (((?cantidad * 100.0) / ?total) AS ?porcentaje) ?usdPorM2
+#WHERE {
+  
+## PRIMER PREGUNTA
+#  ## Obtengo la cantidad de inmuebles por tipo  
+#  {
+#    SELECT ?label (COUNT(?tipo_inmueble) AS ?cantidad)
+#    WHERE {
+#      ?listings a pronto:RealEstateListing .
+#      ?listings sioc:about ?inmuebles .
+#      ?listings gr:hasBusinessFunction gr:Sell .
+#      ?inmuebles a ?tipo_inmueble .
+#      ?inmuebles :hasFeature/:hasValue/:city/rdfs:label ?nombreCiudad .
+#      FILTER(CONTAINS(LCASE(?nombreCiudad), "chapadmalal")) .
+#
+#      BIND(REPLACE(STRAFTER(STR(?tipo_inmueble), "#"), "%20", " ") AS ?label)
+#    }
+#    GROUP BY ?label
+#  }
+#
+### TERCER PREGUNTA
+##  ## Para esto necesito la cantidad total de inmuebles de Chapadmalal
+#  {
+#    SELECT (COUNT(*) AS ?total)
+#    WHERE {
+#      ?listings a pronto:RealEstateListing .
+#      ?listings sioc:about ?inmuebles .
+#      ?listings gr:hasBusinessFunction gr:Sell .
+#      ?inmuebles :hasFeature/:hasValue/:city/rdfs:label ?nombreCiudad .
+#      
+#      FILTER(CONTAINS(LCASE(?nombreCiudad), "chapadmalal")) .
+#    }
+#  }
+## CUARTA PREGUNTA
+#  ## Mediana del precio en USD / M2 de cada tipo de inmuebles
+#  {
+#    SELECT ?label (SUM(?valorDolarizado) / SUM(?superficieEnM2) as ?usdPorM2)
+#    WHERE {
+#        ?listings a pronto:RealEstateListing .
+#        ?listings sioc:about ?inmuebles .
+#        ?listings gr:hasBusinessFunction gr:Sell .
+#        ?inmuebles a ?tipo_inmueble .
+#        ?inmuebles :hasFeature/:hasValue/:city/rdfs:label ?nombreCiudad .
+#        FILTER(CONTAINS(LCASE(?nombreCiudad), "chapadmalal")) .
+#
+#        BIND(REPLACE(STRAFTER(STR(?tipo_inmueble), "#"), "%20", " ") AS ?label)
+#
+#        # Precio
+#        ?listings :hasFeature/:hasValue ?blankNodePrecio .
+#        ?blankNodePrecio a gr:UnitPriceSpecification .
+#        ?blankNodePrecio gr:hasCurrency ?currency .
+#        ?blankNodePrecio gr:hasCurrencyValue ?valorDolares .
+#        ?blankNodePrecio gr:priceType "BASE"^^xsd:string .
+#
+#        # Superficie
+#        ?inmuebles rec:includes/:hasFeature/:hasValue ?blankNodeSuperficie .
+#        ?blankNodeSuperficie gr:hasUnitOfMeasurement ?unitOfMeasurement .
+#        ?blankNodeSuperficie gr:hasValue ?valorEnMetros .
+#        FILTER(DATATYPE(?valorEnMetros) != xsd:string) .
+#
+#        # Normalización de moneda y superficie
+#        BIND(IF(?currency = "ARS", ?valorDolares / 1235, ?valorDolares) AS ?valorDolarizado) .
+#        BIND(IF(?unitOfMeasurement = "ha", ?valorEnMetros * 10000, ?valorEnMetros) AS ?superficieEnM2) .
+#        BIND(?valorDolarizado / ?superficieEnM2 AS ?valorUnitario) .
+#        }
+#    GROUP BY ?label
+#  }
+#}
+##ORDER BY DESC(?cantidad)
+
+
+
+
+# ¿Qué características tiene el mercado inmobiliario en Villa Argüello (Berisso)?
+
+#prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+#prefix brick: <https://brickschema.org/schema/Brick#>
+#prefix dc: <http://purl.org/dc/elements/1.1/>
+#prefix dcterms: <http://purl.org/dc/terms/>
+#prefix foaf: <http://xmlns.com/foaf/0.1/>
+#prefix gr: <http://purl.org/goodrelations/v1#>
+#prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+#prefix owl: <http://www.w3.org/2002/07/owl#>
+#prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
+#prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+#prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+#prefix rec: <https://w3id.org/rec#>
+#prefix sioc: <http://rdfs.org/sioc/ns#>
+#prefix skos: <http://www.w3.org/2004/02/skos/core#>
+#prefix time: <http://www.w3.org/2006/time#>
+#prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Tenemos que cambiar un poco la consigna ya que no hay nada en Berisso
+
+#SELECT ?nombreCiudad (COUNT(*) AS ?cantidadInmuebles)
+#WHERE {
+#  ?listing a pronto:RealEstateListing .
+#  ?listing sioc:about ?inmueble .
+#  ?inmueble :hasFeature/:hasValue/:city/rdfs:label ?nombreCiudad .
+#}
+#GROUP BY ?nombreCiudad
+#ORDER BY DESC(?cantidadInmuebles)
+
+# MDQ = 990
+# Chapadmalal = 138
+# General Pueyrredon = 17
+# General Alvarado = 10
+# Balcarce = 5
+# Miramar = 3
+# Brandsen = 2
+# Bolivar = 1
+# Castelli = 1
+# Florencio Varela = 1
+# Mar chiquita = 1
+# Mar del Sur = 1
+
+# ¿Qué características tiene el mercado inmobiliario en Chapadmalal?
+
+# # Que debemos hacer
+
+# # # Cantidad de inmuebles que se ofertan a la venta en este lugar
+# # # Producto inmobiliario tipico ==> ?????
+# # # Composición de los inmuebles ==> El 45% de los inmuebles son casas, el 30% son terrenos...
+# # # Mediana del precio en USD / M2 de cad tipo de inmuebles
+# # # Antiguedad promedio de los inmuebles construidos => TERRENO NO (supongo)
+
+# Primera consulta, contar los que tiene chapadmalal
+#SELECT ?label (count(?tipo_inmueble) AS ?cantidad)
+#WHERE 
+#  {
+#    # Cantidad de inmuebles que se ofertan a la venta. 15 departamentos, 20 casas, etc.
+#    ?listings a pronto:RealEstateListing .
+#    ?listings sioc:about ?inmuebles .
+#    ?listings gr:hasBusinessFunction gr:Sell .
+#    ?inmuebles a ?tipo_inmueble .
+#    ?inmuebles :hasFeature/:hasValue/:city/rdfs:label ?nombreCiudad .
+#
+#    FILTER(CONTAINS(LCASE(?nombreCiudad), "chapadmalal")) .
+#    
+#    BIND(REPLACE(STRAFTER(STR(?tipo_inmueble), "#"), "%20", " ") AS ?label)
+#}
+#GROUP BY ?label
+#ORDER BY DESC(?cantidad)
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------
+
+# ¿Qué características tiene el mercado inmobiliario en Villa Argüello (Berisso)?
+
+prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+prefix brick: <https://brickschema.org/schema/Brick#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix gr: <http://purl.org/goodrelations/v1#>
+prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rec: <https://w3id.org/rec#>
+prefix sioc: <http://rdfs.org/sioc/ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix time: <http://www.w3.org/2006/time#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Tenemos que cambiar un poco la consigna ya que no hay nada en Berisso
+
+#SELECT ?nombreCiudad (COUNT(*) AS ?cantidadInmuebles)
+#WHERE {
+#  ?listing a pronto:RealEstateListing .
+#  ?listing sioc:about ?inmueble .
+#  ?inmueble :hasFeature/:hasValue/:city/rdfs:label ?nombreCiudad .
+#}
+#GROUP BY ?nombreCiudad
+#ORDER BY DESC(?cantidadInmuebles)
+
+# MDQ = 990
+# Chapadmalal = 138
+# General Pueyrredon = 17
+# General Alvarado = 10
+# Balcarce = 5
+# Miramar = 3
+# Brandsen = 2
+# Bolivar = 1
+# Castelli = 1
+# Florencio Varela = 1
+# Mar chiquita = 1
+# Mar del Sur = 1
+
+# ¿Qué características tiene el mercado inmobiliario en Chapadmalal?
+
+# # Que debemos hacer
+
+# # # Cantidad de inmuebles que se ofertan a la venta en este lugar
+# # # Producto inmobiliario tipico ==> ?????
+# # # Composición de los inmuebles ==> El 45% de los inmuebles son casas, el 30% son terrenos...
+# # # Mediana del precio en USD / M2 de cada tipo de inmuebles
+# # # Antiguedad promedio de los inmuebles construidos => TERRENO NO (supongo)
+
+# 1) Label y cantidad
+# 2) ???
+# 3) Composición de los inmuebles
+# 4) Mediana del precio en USD /M2 por cada tipo de inmueble
+# 5) Antiguedad promedio de cada tipo de inmueble
+SELECT ?label ?cantidad ?porcentaje ?usdPorM2
+WHERE {
+    
+  ## PRIMER PREGUNTA
+  {
+    SELECT ?label (COUNT(?tipo_inmueble) AS ?cantidad)
+    WHERE {
+      ?listings a pronto:RealEstateListing .
+      ?listings sioc:about ?inmuebles .
+      ?listings gr:hasBusinessFunction gr:Sell .
+      ?inmuebles a ?tipo_inmueble .
+      ?inmuebles :hasFeature/:hasValue/:city/rdfs:label ?nombreCiudad .
+      FILTER(CONTAINS(LCASE(?nombreCiudad), "chapadmalal")) .
+
+      BIND(REPLACE(STRAFTER(STR(?tipo_inmueble), "#"), "%20", " ") AS ?label)
+    }
+    GROUP BY ?label
+  }
+
+  ## TERCER PREGUNTA
+  {
+    SELECT (COUNT(*) AS ?total)
+    WHERE {
+      ?listings a pronto:RealEstateListing .
+      ?listings sioc:about ?inmuebles .
+      ?listings gr:hasBusinessFunction gr:Sell .
+      ?inmuebles :hasFeature/:hasValue/:city/rdfs:label ?nombreCiudad .
+      FILTER(CONTAINS(LCASE(?nombreCiudad), "chapadmalal")) .
+    }
+  }
+
+  ## CUARTA PREGUNTA
+  {
+    SELECT ?label (SUM(?valorDolarizado) / SUM(?superficieEnM2) as ?usdPorM2)
+    WHERE {
+      ?listings a pronto:RealEstateListing .
+      ?listings sioc:about ?inmuebles .
+      ?listings gr:hasBusinessFunction gr:Sell .
+      ?inmuebles a ?tipo_inmueble .
+      ?inmuebles :hasFeature/:hasValue/:city/rdfs:label ?nombreCiudad .
+      FILTER(CONTAINS(LCASE(?nombreCiudad), "chapadmalal")) .
+
+      BIND(REPLACE(STRAFTER(STR(?tipo_inmueble), "#"), "%20", " ") AS ?label)
+
+      # Precio
+      ?listings :hasFeature/:hasValue ?blankNodePrecio .
+      ?blankNodePrecio a gr:UnitPriceSpecification .
+      ?blankNodePrecio gr:hasCurrency ?currency .
+      ?blankNodePrecio gr:hasCurrencyValue ?valorDolares .
+      ?blankNodePrecio gr:priceType "BASE"^^xsd:string .
+
+      # Superficie
+      ?inmuebles rec:includes/:hasFeature/:hasValue ?blankNodeSuperficie .
+      ?blankNodeSuperficie gr:hasUnitOfMeasurement ?unitOfMeasurement .
+      ?blankNodeSuperficie gr:hasValue ?valorEnMetros .
+      FILTER(DATATYPE(?valorEnMetros) != xsd:string) .
+
+      # Normalización
+      BIND(IF(?currency = "ARS", ?valorDolares / 1235, ?valorDolares) AS ?valorDolarizado) .
+      BIND(IF(?unitOfMeasurement = "ha", ?valorEnMetros * 10000, ?valorEnMetros) AS ?superficieEnM2) .
+    }
+    GROUP BY ?label
+  }
+
+  ## QUINTA PREGUNTA
+    # Antiguedad promedio
+  {
+    # Consultar como acceder a la antiguedad
+  }
+
+  ## CÁLCULO FINAL DEL PORCENTAJE
+  # GRACIAS GEPETO
+  BIND((xsd:float(?cantidad) * 100.0) / xsd:float(?total) AS ?porcentaje)
+}
+GROUP BY ?label ?cantidad ?usdPorM2 ?total ?porcentaje
+ORDER BY DESC(?cantidad)

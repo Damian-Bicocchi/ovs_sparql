@@ -1,0 +1,94 @@
+# ¿Cómo ha evolucionado el precio del metro cuadrado de los departamentos de 1 ambiente
+# en MDQ entre febrero de 2023 y agosto de 2024?
+
+prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+prefix brick: <https://brickschema.org/schema/Brick#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix gr: <http://purl.org/goodrelations/v1#>
+prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rec: <https://w3id.org/rec#>
+prefix sioc: <http://rdfs.org/sioc/ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix time: <http://www.w3.org/2006/time#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?año ?mes (AVG(?valorPorM2) as ?promedio)
+WHERE {
+  # Obtengo los listings y los departamentos
+  ?listings a pronto:RealEstateListing .
+  ?listings sioc:read_at ?fechaListing .
+  ?listings sioc:about ?inmueble .
+  ?inmueble a :Departamento .
+
+  # Filtro los de MDQ
+  ?inmueble :hasFeature/:hasValue/:city/rdfs:label ?labelMDQ .
+  FILTER(
+    CONTAINS(
+      LCASE(STR(?labelMDQ)),
+      "mar del plata"
+    )
+  )
+  # Filtro (con un join) los que solo tengan un dormitorio
+  {
+    SELECT ?inmueble (COUNT(*) as ?cantHabitaciones)
+    WHERE {
+      # NECESARIO, ACA ADENTRO NO SE "VE" LAS VARIABLES DE AFUERA
+      ?inmueble a :Departamento .
+
+      ?inmueble rec:includes/brick:hasPart/brick:hasPart ?habitacion .
+      ?habitacion a rec:Bedroom .
+    }
+    GROUP BY ?inmueble
+    HAVING (?cantHabitaciones = 1)
+  }
+ 
+  # Obtengo el mes y el año del listing
+  ?listings sioc:read_at ?fechaDelListing .
+  BIND(
+    MONTH(?fechaDelListing) AS ?mes
+  )
+  BIND(
+    YEAR(?fechaDelListing) AS ?año
+  )
+
+  # Precio
+  ?listings :hasFeature/:hasValue ?blankNodePrecio .
+  ?blankNodePrecio a gr:UnitPriceSpecification .
+  ?blankNodePrecio gr:hasCurrency ?currency .
+  ?blankNodePrecio gr:hasCurrencyValue ?valorDolares .
+  ?blankNodePrecio gr:priceType "BASE"^^xsd:string .
+
+  # Superficie
+  ?inmueble rec:includes ?blankNodeSuperficie .
+  # Nos quedamos unicamente con los rec:Site
+  ?blankNodeSuperficie a rec:Site.
+  # Un departamento tiene dos superficies. Una total, y un subconjunto de la total que es la cubierta
+  # Los departamentos de este barrio que estan en hectareas en la superficie total, no tienen valor
+  # Debe de ser un error?
+  # La cubierta
+  ?blankNodeSuperficie :hasFeature/:hasValue ?blankNodeSuperficieCubierta .
+  ?blankNodeSuperficieCubierta pronto:size_type "covered"^^xsd:string .
+  ?blankNodeSuperficieCubierta gr:hasUnitOfMeasurement ?medidaCubiertaSinEstandar .
+  ?blankNodeSuperficieCubierta gr:hasValue ?valorCubiertaSinEstandar .
+
+  # Normalización
+  BIND(IF(?currency = "ARS", ?valorDolares / 1235, ?valorDolares) AS ?valorDolarizado) .
+  BIND(IF(?medidaCubiertaSinEstandar = "ha", ?valorCubiertaSinEstandar * 10000, ?valorCubiertaSinEstandar) AS ?superficieEnM2) .
+  BIND(?valorDolarizado / ?superficieEnM2 AS ?valorPorM2) .
+
+  # Filtro por fecha
+  FILTER(
+    (?mes >= 2 && ?año = 2023)
+    ||
+    (?mes <= 8 && ?año = 2024)
+  )
+  
+  #
+}
+GROUP BY ?año ?mes

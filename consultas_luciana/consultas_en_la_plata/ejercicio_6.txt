@@ -1,0 +1,134 @@
+prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+prefix brick: <https://brickschema.org/schema/Brick#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix gr: <http://purl.org/goodrelations/v1#>
+prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rec: <https://w3id.org/rec#>
+prefix sioc: <http://rdfs.org/sioc/ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix time: <http://www.w3.org/2006/time#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# 6. ¿Qué precio por metro cuadrado tienen los departamentos en Vicente López? ¿Son más baratos que en Quilmes?
+
+# No hay inmuebles para Vicente Lopez, y Quilmes solo aparece en labels, por lo que esta data podría no ser correcta
+
+#SELECT ?labelConDep (COUNT(*) AS ?cant)
+#WHERE {
+#  ?dep a :Apartment .
+#  ?dep :hasFeature/:hasValue/:neighborhood/rdfs:label ?labelConDep
+#}
+#GROUP BY ?labelConDep
+#ORDER BY DESC(?cant)
+#
+# La Plata: 5865 # Tolosa: 144 # City Bell: 133 # Los Hornos: 100
+# Barrio Norte: 73 # Villa Elvira: 48 # Manuel B Gonnet: 43 # Villa Elisa: 41
+# Manuel B. Gonnet: 28 # Ringuelet: 25 # Microcentro: 15 # José Hernández: 14
+# San Carlos: 8 # Barrio Gambier: 6 # Centro calle 8: 5
+# 6.2 ¿Qué precio por metro cuadrado tienen los departamentos en Tolosa? ¿Son más baratos que en Los Hornos?
+
+SELECT *
+WHERE{
+    {
+        # Tolosa
+        SELECT (AVG(?promIndividual) AS ?promUSDm2Tolosa)
+        WHERE {
+            ?real_estate_instance a :Apartment .
+            ?real_estate_instance :hasFeature/:hasValue/:neighborhood/rdfs:label ?tolosa .
+            FILTER(CONTAINS(LCASE(STR(?tolosa)), "tolosa")) 
+            ?real_estate_instance ^sioc:about ?listing .
+            # Sacamos el precio
+            ?listing :hasFeature/:hasValue ?blankNodePrecio .
+            ?blankNodePrecio a gr:UnitPriceSpecification .
+            ?blankNodePrecio gr:hasCurrency ?monedaSinEstandar .
+            ?blankNodePrecio gr:hasCurrencyValue ?valorSinEstandar .
+            ?blankNodePrecio gr:priceType "BASE"^^xsd:string .
+
+            # Estandarizamos a dolares
+            BIND(
+                IF(?monedaSinEstandar = "ARS", ?valorSinEstandar / 1375, ?valorSinEstandar)
+                AS ?valorEnDolares
+            )
+
+            # Buscamos el tamaño
+            ?real_estate_instance rec:includes ?blankNodeSuperficie .
+            # Nos quedamos unicamente con los rec:Site
+            ?blankNodeSuperficie a rec:Site .
+            # Un departamento tiene dos superficies. Una total, y un subconjunto de la total que es la cubierta
+            # Los departamentos de este barrio que estan en hectareas en la superficie total, no tienen valor
+            # Debe de ser un error?
+            # La cubierta
+            ?blankNodeSuperficie :hasFeature/:hasValue ?blankNodeSuperficieCubierta .
+            ?blankNodeSuperficieCubierta pronto:size_type "covered"^^xsd:string .
+            ?blankNodeSuperficieCubierta gr:hasUnitOfMeasurement ?medidaCubiertaSinEstandar .
+            ?blankNodeSuperficieCubierta gr:hasValue ?valorCubiertaSinEstandar .
+
+            BIND(
+                IF(?medidaCubiertaSinEstandar = "ha", ?valorCubiertaSinEstandar * 10000, ?valorCubiertaSinEstandar)
+                AS ?valorEnMetros
+            )
+            
+            BIND(
+                (xsd:float(?valorEnDolares) / xsd:float(?valorEnMetros)) AS ?promIndividual
+            )
+        }
+    }
+    {
+        # Los Hornos
+        SELECT (AVG(?promIndividual) AS ?promUSDm2LosHornos)
+        WHERE {
+            ?real_estate_instance a :Apartment .
+            ?real_estate_instance :hasFeature/:hasValue/:neighborhood/rdfs:label ?barrio .
+            FILTER(CONTAINS(LCASE(STR(?barrio)), "los hornos"))
+
+            ?real_estate_instance ^sioc:about ?listing .
+
+            # Sacamos el precio
+            ?listing :hasFeature/:hasValue ?blankNodePrecio .
+            ?blankNodePrecio a gr:UnitPriceSpecification .
+
+            ?blankNodePrecio gr:hasCurrency ?monedaSinEstandar .
+            ?blankNodePrecio gr:hasCurrencyValue ?valorSinEstandar .
+            ?blankNodePrecio gr:priceType "BASE"^^xsd:string .
+
+            # Estandarizamos a dolares
+            BIND(
+                IF(?monedaSinEstandar = "ARS", ?valorSinEstandar / 1375, ?valorSinEstandar)
+                AS ?valorEnDolares
+            )
+
+            # Buscamos el tamaño
+            ?real_estate_instance rec:includes ?blankNodeSuperficie .
+            # Nos quedamos unicamente con los rec:Site
+            ?blankNodeSuperficie a rec:Site.
+            # Un departamento tiene dos superficies. Una total, y un subconjunto de la total que es la cubierta
+            # Los departamentos de este barrio que estan en hectareas en la superficie total, no tienen valor
+            # Debe de ser un error?
+            # La cubierta
+            ?blankNodeSuperficie :hasFeature/:hasValue ?blankNodeSuperficieCubierta .
+            ?blankNodeSuperficieCubierta pronto:size_type "covered"^^xsd:string .
+            ?blankNodeSuperficieCubierta gr:hasUnitOfMeasurement ?medidaCubiertaSinEstandar .
+            ?blankNodeSuperficieCubierta gr:hasValue ?valorCubiertaSinEstandar .
+
+            BIND(
+                IF(?medidaCubiertaSinEstandar = "ha", ?valorCubiertaSinEstandar * 10000, ?valorCubiertaSinEstandar)
+                AS ?valorEnMetros
+            )
+            
+            BIND(
+                (xsd:float(?valorEnDolares) / xsd:float(?valorEnMetros)) AS ?promIndividual
+            )
+        }
+    }
+}
+
+
+# Respuesta
+# Tolosa = 930.69
+# Los Hornos = 870.88

@@ -1,0 +1,59 @@
+#¿Cuál es el precio en dólares por m2 de los lotes en barrios cerrado o clubes de campo en La
+#Plata? ¿Podrías listarme el nombre de los barrios que tuviste en cuenta para brindarme ese
+#precios de referencias?
+
+prefix : <http://www.semanticweb.org/luciana/ontologies/2024/8/inmontology#>
+prefix brick: <https://brickschema.org/schema/Brick#>
+prefix dc: <http://purl.org/dc/elements/1.1/>
+prefix dcterms: <http://purl.org/dc/terms/>
+prefix foaf: <http://xmlns.com/foaf/0.1/>
+prefix gr: <http://purl.org/goodrelations/v1#>
+prefix ns: <http://www.w3.org/2003/06/sw-vocab-status/ns#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix pronto: <https://raw.githubusercontent.com/fdioguardi/pronto/main/ontology/pronto.owl#>
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix rec: <https://w3id.org/rec#>
+prefix sioc: <http://rdfs.org/sioc/ns#>
+prefix skos: <http://www.w3.org/2004/02/skos/core#>
+prefix time: <http://www.w3.org/2006/time#>
+prefix xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?barrioFeo (AVG(?valorPorM2) AS ?precioPromedioUSD)
+WHERE {
+  ?terreno a :Terreno .
+  ?terreno :hasFeature/:hasValue/:neighborhood ?barrioFeo .
+  ?terreno :hasFeature/:hasValue/:city/rdfs:label ?labelCiudad .
+  ?terreno ^sioc:about ?listings .
+
+  ?listings rdfs:label ?labelListing .
+
+  FILTER(
+    CONTAINS(LCASE(STR(?barrioFeo)), "privado") 
+    ||
+    CONTAINS(LCASE(STR(?barrioFeo)), "cerrado")
+    ||
+    CONTAINS(LCASE(STR(?labelListing)), "privado")
+    ||
+    CONTAINS(LCASE(STR(?labelListing)), "cerrado")  
+  )
+
+  # Precio
+  ?listings :hasFeature/:hasValue ?blankNodePrecio .
+  ?blankNodePrecio a gr:UnitPriceSpecification .
+  ?blankNodePrecio gr:hasCurrency ?currency .
+  ?blankNodePrecio gr:hasCurrencyValue ?valorDolares .
+  ?blankNodePrecio gr:priceType "BASE"^^xsd:string .
+  # Superficie
+  ?terreno rec:includes/:hasFeature/:hasValue ?blankNodeSuperficie .
+  ?blankNodeSuperficie gr:hasUnitOfMeasurement ?unitOfMeasurement .
+  ?blankNodeSuperficie gr:hasValue ?valorEnMetros .
+  FILTER(DATATYPE(?valorEnMetros) != xsd:string) .
+  # Normalización
+  BIND(IF(?currency = "ARS", ?valorDolares / 1235, ?valorDolares) AS ?valorDolarizado) .
+  BIND(IF(?unitOfMeasurement = "ha", ?valorEnMetros * 10000, ?valorEnMetros) AS ?superficieEnM2) .
+  BIND(?valorDolarizado / ?superficieEnM2 AS ?valorPorM2) .
+
+
+}
+GROUP BY ?barrioFeo
